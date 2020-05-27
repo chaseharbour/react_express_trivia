@@ -3,13 +3,16 @@ import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 
 const ENDPOINT = "http://localhost:5000";
+let socket;
 
 const Chat = () => {
   const [userName, setUserName] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const socket = io(ENDPOINT, { transports: ["websocket"] });
+  if (!socket) {
+    socket = io(ENDPOINT, { transports: ["websocket"] });
+  }
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -21,14 +24,16 @@ const Chat = () => {
     setMessage("");
   };
 
-  socket.on("RECEIVE_MESSAGE", function (data) {
-    addMessage(data);
-  });
-
   const addMessage = (data) => {
     console.log(data);
     setMessages([...messages, data]);
   };
+
+  useEffect(() => {
+    socket.on("RECEIVE_MESSAGE", function (data) {
+      addMessage(data);
+    });
+  }, [messages]);
 
   return (
     <div className="p-10">
