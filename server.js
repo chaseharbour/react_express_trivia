@@ -11,6 +11,8 @@ app.use(index);
 //Start server and console.log success message
 http.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
+io.set("transports", ["websocket"]);
+
 //Console log user connected on new socket connection
 io.on("connection", (socket) => {
   console.log(`A user has connected with ID: ${socket.id}`);
@@ -19,10 +21,3 @@ io.on("connection", (socket) => {
     io.emit("RECEIVE_MESSAGE", data);
   });
 });
-
-const getApiAndEmit = (socket) => {
-  const response = "Test";
-
-  //Emit message to be consumed by client
-  socket.emit("FromAPI", response);
-};

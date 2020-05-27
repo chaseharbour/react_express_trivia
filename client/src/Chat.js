@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 
 const ENDPOINT = "http://localhost:5000";
 
@@ -8,7 +9,7 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const socket = io(ENDPOINT);
+  const socket = io(ENDPOINT, { transports: ["websocket"] });
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -20,16 +21,13 @@ const Chat = () => {
     setMessage("");
   };
 
-  useEffect(() => {
-    socket.on("RECEIVE_MESSAGE", function (data) {
-      addMessage(data);
-    });
+  socket.on("RECEIVE_MESSAGE", function (data) {
+    addMessage(data);
   });
 
   const addMessage = (data) => {
     console.log(data);
     setMessages([...messages, data]);
-    console.log(messages);
   };
 
   return (
@@ -40,7 +38,7 @@ const Chat = () => {
           <ul>
             {messages.map((msg) => {
               return (
-                <li key={messages.length}>
+                <li key={uuidv4()}>
                   {msg.author}: {msg.text}
                 </li>
               );
