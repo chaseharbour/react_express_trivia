@@ -16,6 +16,8 @@ const Chat = ({ location }) => {
   const [messages, setMessages] = useState([]);
   const [usersInRoom, setUsersInRoom] = useState("");
 
+  const [questions, setQuestions] = useState([]);
+
   const ENDPOINT = "http://localhost:5000";
 
   //On mount: 1) destructures data from login with queryString 2) defines the socket connection 3) updates state of userName and room 4) emits data to server via socket
@@ -46,9 +48,10 @@ const Chat = ({ location }) => {
       console.log(usersInRoom);
     });
 
-    socket.on("questionData", ({ questions }) => {
-      console.log(questions);
+    socket.on("questionData", ({ questionData }) => {
+      setQuestions(questionData);
     });
+    console.log(questions);
   }, []);
 
   const sendMessage = (event) => {
@@ -77,6 +80,7 @@ const Chat = ({ location }) => {
         </div>
       </div>
       <RoomUsers users={usersInRoom} />
+      <Trivia questions={questions} />
     </div>
   );
 };
@@ -84,5 +88,7 @@ const Chat = ({ location }) => {
 export default Chat;
 
 //
-//<Trivia />
+//
+//
+//
 //

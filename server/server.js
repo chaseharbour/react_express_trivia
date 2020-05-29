@@ -12,17 +12,11 @@ const axios = require("axios");
 const PORT = process.env.PORT || 5000;
 const router = require("./routes/index");
 
-let apiData;
-
-axios
-  .get("https://opentdb.com/api.php?amount=2&category=23")
-  .then((res) => (apiData = res.data.results))
-  .catch((error) => console.log(error));
+let gameState = false;
 
 //Console log user connected on new socket connection
 io.on("connection", (socket) => {
   console.log(`A user has connected with ID: ${socket.id}`);
-  console.log(apiData.map((q) => q.question));
 
   socket.on("join", ({ userName, room }, callback) => {
     //console.log(`User ${socket.id} joined ${room} with username: ${userName}`);
@@ -44,16 +38,21 @@ io.on("connection", (socket) => {
       user: "Server",
       text: `${user.userName} has joined the room!`,
     });
-
     io.to(user.room).emit("roomData", {
       room: user.room,
       users: getUsersInRoom(user.room),
     });
 
-    //Send API data to Trivia component
-    io.to(user.room).emit("questionData", {
-      room: user.room,
-      questions: apiData.map((q) => q.question),
+    if (!gameState) {
+    }
+    getAPIData().then((apiData) => {
+      //Send API data to Trivia component
+      //console.log(apiData);
+
+      io.to(user.room).emit("questionData", {
+        room: user.room,
+        questionData: apiData.map((q) => q),
+      });
     });
 
     callback();
@@ -90,3 +89,10 @@ app.use(router);
 
 //Start server and console.log success message
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
+function getAPIData() {
+  return axios
+    .get("https://opentdb.com/api.php?amount=2&category=23")
+    .then((res) => res.data.results)
+    .catch((error) => console.log(error));
+}
