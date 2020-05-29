@@ -4,6 +4,8 @@ import io from "socket.io-client";
 import InfoBar from "./InfoBar";
 import Input from "./Input";
 import Messages from "./Messages";
+import RoomUsers from "./RoomUsers";
+import Trivia from "./Trivia";
 
 let socket;
 
@@ -12,6 +14,7 @@ const Chat = ({ location }) => {
   const [room, setRoom] = useState("General");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [usersInRoom, setUsersInRoom] = useState("");
 
   const ENDPOINT = "http://localhost:5000";
 
@@ -35,9 +38,18 @@ const Chat = ({ location }) => {
 
   useEffect(() => {
     socket.on("message", (message) => {
-      setMessages([...messages, message]);
+      setMessages((messages) => [...messages, message]);
     });
-  }, [messages]);
+
+    socket.on("roomData", ({ users }) => {
+      setUsersInRoom(users);
+      console.log(usersInRoom);
+    });
+
+    socket.on("questionData", ({ questions }) => {
+      console.log(questions);
+    });
+  }, []);
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -51,10 +63,9 @@ const Chat = ({ location }) => {
 
   return (
     <div className="p-10">
-      <InfoBar room={room} />
-      <div className="container h-auto mx-auto border-solid border-4 border-gray-600 p-2">
-        <h1>Test</h1>
-        <div className="h-64 mx-auto border-solid border-4 border-gray-500">
+      <div className="container h-auto mx-auto border-solid border-4 border-gray-600 p-2 rounded">
+        <InfoBar room={room} />
+        <div className="h-64 p-1 pb-0 mx-auto border-solid border-4 border-gray-500 rounded">
           <Messages messages={messages} userName={userName} />
         </div>
         <div className="mx-auto flex flex-col mt-4">
@@ -65,8 +76,13 @@ const Chat = ({ location }) => {
           />
         </div>
       </div>
+      <RoomUsers users={usersInRoom} />
     </div>
   );
 };
 
 export default Chat;
+
+//
+//<Trivia />
+//
