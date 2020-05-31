@@ -38,21 +38,15 @@ io.on("connection", (socket) => {
       user: "Server",
       text: `${user.userName} has joined the room!`,
     });
+
     io.to(user.room).emit("roomData", {
       room: user.room,
       users: getUsersInRoom(user.room),
     });
 
-    if (!gameState) {
-    }
-    getAPIData().then((apiData) => {
-      //Send API data to Trivia component
-      //console.log(apiData);
-
-      io.to(user.room).emit("questionData", {
-        room: user.room,
-        questionData: apiData.map((q) => q),
-      });
+    io.to(user.room).emit("gameState", {
+      room: user.room,
+      gameState: gameState,
     });
 
     callback();
@@ -82,6 +76,43 @@ io.on("connection", (socket) => {
     io.to(user.room).emit("message", { user: user.userName, text: message });
 
     callback();
+  });
+
+  socket.on("startGame", () => {
+    const user = getUser(socket.id);
+    gameState = true;
+    console.log("Game has started");
+
+    getAPIData().then((apiData) => {
+      //Send API data to Trivia component
+      //console.log(apiData);
+
+      io.to(user.room).emit("questionData", {
+        room: user.room,
+        questionData: apiData.map((q) => q),
+      });
+    });
+
+    io.to(user.room).emit("gameState", {
+      room: user.room,
+      gameState: gameState,
+    });
+  });
+
+  socket.on("endGame", () => {
+    const user = getUser(socket.id);
+    gameState = false;
+    console.log("Game has ended");
+
+    io.to(user.room).emit("gameState", {
+      room: user.room,
+      gameState: gameState,
+    });
+  });
+
+  socket.on("answer", (answer) => {
+    const user = getUser(socket.id);
+    console.log(answer);
   });
 });
 

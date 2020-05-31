@@ -17,6 +17,7 @@ const Chat = ({ location }) => {
   const [usersInRoom, setUsersInRoom] = useState("");
 
   const [questions, setQuestions] = useState([]);
+  const [gameState, setGameState] = useState(false);
 
   const ENDPOINT = "http://localhost:5000";
 
@@ -51,8 +52,23 @@ const Chat = ({ location }) => {
     socket.on("questionData", ({ questionData }) => {
       setQuestions(questionData);
     });
-    console.log(questions);
+
+    socket.on("gameState", ({ gameState }) => {
+      setGameState(gameState);
+    });
   }, []);
+
+  const startGame = (event) => {
+    event.preventDefault();
+
+    socket.emit("startGame");
+  };
+
+  const endGame = (event) => {
+    event.preventDefault();
+
+    socket.emit("endGame");
+  };
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -80,7 +96,16 @@ const Chat = ({ location }) => {
         </div>
       </div>
       <RoomUsers users={usersInRoom} />
-      <Trivia questions={questions} />
+      <Trivia questions={questions} gameState={gameState} socket={socket} />
+      {gameState ? (
+        <button onClick={(e) => endGame(e)} className="p-2 m-4 bg-gray-300">
+          End Game
+        </button>
+      ) : (
+        <button onClick={(e) => startGame(e)} className="p-2 m-4 bg-gray-300">
+          Start Game
+        </button>
+      )}
     </div>
   );
 };
